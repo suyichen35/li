@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正在建设中</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        /* 音频控制按钮样式 */
+        .audio-control {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        .audio-control:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+        }
+        .audio-control.active {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+        }
+        .audio-icon {
+            width: 24px;
+            height: 24px;
+            fill: #4b5563;
+            transition: fill 0.3s ease;
+        }
+        .audio-control.active .audio-icon {
+            fill: white;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #fafbfc 0%, #f0f2f5 50%, #e8eaed 100%);
+            color: #1f2937;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            position: relative;
+        }
+        /* 精致背景纹理 */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(107, 114, 128, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(107, 114, 128, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(107, 114, 128, 0.02) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .page {
+            position: relative;
+            text-align: center;
+            max-width: 500px;
+            padding: 60px 48px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.06),
+                0 2px 8px rgba(0, 0, 0, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            animation: fadeInUp 0.6s ease-out;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* 角落装饰线 */
+        .corner-line {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            border: 2px solid #e5e7eb;
+            border-top-color: transparent;
+            border-right-color: transparent;
+        }
+        .corner-line-tl {
+            top: 16px;
+            left: 16px;
+            border-radius: 8px 0 0 0;
+        }
+        .corner-line-tr {
+            top: 16px;
+            right: 16px;
+            transform: rotate(90deg);
+            border-radius: 8px 0 0 0;
+        }
+        .corner-line-bl {
+            bottom: 16px;
+            left: 16px;
+            transform: rotate(-90deg);
+            border-radius: 8px 0 0 0;
+        }
+        .corner-line-br {
+            bottom: 16px;
+            right: 16px;
+            transform: rotate(180deg);
+            border-radius: 8px 0 0 0;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 32px;
+            padding: 10px 24px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            color: #4b5563;
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+        .badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.8); }
+        }
+        h1 {
+            font-size: clamp(2rem, 4.5vw, 2.8rem);
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #111827;
+            letter-spacing: -0.01em;
+            background: linear-gradient(135deg, #111827 0%, #374151 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        p {
+            font-size: 1.05rem;
+            color: #6b7280;
+            margin-bottom: 36px;
+            line-height: 1.75;
+            letter-spacing: 0.01em;
+        }
+        .progress {
+            position: relative;
+            height: 8px;
+            border-radius: 3px;
+            background: #e5e7eb;
+            overflow: hidden;
+        }
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: -15%;
+            height: 100%;
+            width: 15%;
+            background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 50%, #60a5fa 100%);
+            border-radius: 2px;
+            animation: xp-slide 3s linear infinite;
+        }
+        @keyframes xp-slide {
+            0% { left: -15%; }
+            100% { left: 115%; }
+        }
+        .footer {
+            margin-top: 36px;
+            padding-top: 28px;
+            border-top: 1px solid #f3f4f6;
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+        .footer span {
+            margin: 0 12px;
+            position: relative;
+        }
+        .footer span:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 2px;
+            border-radius: 50%;
+            background: #d1d5db;
+        }
+    </style>
+    <script>
+        // 背景音乐自动播放处理
+        document.addEventListener('DOMContentLoaded', function() {
+            var audio = document.getElementById('bg-music');
+            var controlBtn = document.getElementById('audio-control');
+            var isPlaying = false;
+            
+            // 音乐列表
+            var musicList = [
+                './白鹿 - 临江仙.mp3',
+                './池鱼 - 谁家.mp3',
+                './新鸳鸯蝴蝶梦 - 江湖Johnhuu.mp3'
+            ];
+            
+            // 使用时间戳作为种子生成更随机的索引
+            var timestamp = Date.now();
+            var randomIndex = timestamp % musicList.length;
+            audio.src = musicList[randomIndex];
+            
+            // 尝试自动播放
+            function tryPlay() {
+                if (audio && !isPlaying) {
+                    audio.play().then(function() {
+                        isPlaying = true;
+                        controlBtn.classList.add('active');
+                    }).catch(function(err) {
+                        // 自动播放失败，等待用户交互
+                        console.log('自动播放被阻止，等待用户交互');
+                    });
+                }
+            }
+            
+            // 点击控制按钮
+            controlBtn.addEventListener('click', function() {
+                if (isPlaying) {
+                    audio.pause();
+                    isPlaying = false;
+                    controlBtn.classList.remove('active');
+                } else {
+                    audio.play();
+                    isPlaying = true;
+                    controlBtn.classList.add('active');
+                }
+            });
+            
+            // 监听音频播放/暂停事件
+            audio.addEventListener('play', function() {
+                isPlaying = true;
+                controlBtn.classList.add('active');
+            });
+            
+            audio.addEventListener('pause', function() {
+                isPlaying = false;
+                controlBtn.classList.remove('active');
+            });
+            
+            // 页面加载后尝试播放
+            tryPlay();
+            
+            // 监听页面可见性变化
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden && !isPlaying) {
+                    tryPlay();
+                }
+            });
+            
+            // 触摸事件触发（移动端）
+            document.addEventListener('touchstart', tryPlay, { once: true });
+            document.addEventListener('click', tryPlay, { once: true });
+        });
+    </script>
+</head>
+<body>
+    <!-- 背景音乐 -->
+    <audio id="bg-music" loop volume="0.3"></audio>
+    
+    <!-- 音频控制按钮 -->
+    <div id="audio-control" class="audio-control">
+        <svg class="audio-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+        </svg>
+    </div>
+    
+    <main class="page">
+        <div class="badge">Under Construction</div>
+        <h1>网站建设中</h1>
+        <p>正在精心准备内容，敬请稍后访问</p>
+        <div class="progress">
+            <div class="progress-bar"></div>
+        </div>
+        <div class="footer">
+            <span>敬请期待</span>
+            <span>|</span>
+            <span>感谢您的耐心</span>
+        </div>
+    </main>
+</body>
+</html>
